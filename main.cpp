@@ -38,24 +38,31 @@ T max(T a, T b) {
 
 int main(int argc, const char * argv[]) {
     
-    // section1();
+//     section1();
     // section2();
     // section3();
     
     double sigma0 = 0.2;
     double s0 = 10.0;
-    function<double(double)> diff = std::bind( std::multiplies<double>(), std::bind( powl, _1, 0.8 ), sigma0);
+    function<double(double)> diff = std::bind(std::multiplies<double>(),
+                                              sigma0,
+                                              std::bind(sqrtl,
+                                                        std::bind(std::plus<double>(),
+                                                                  std::bind(powl,
+                                                                            _1,
+                                                                            2.0),
+                                                                  1.0)));
     shared_ptr<C2Function1D> diffusion(new C2Function1D(diff));
     shared_ptr<DriftlessItoProcess> diprocess(new DriftlessItoProcess(s0, diffusion, DriftlessItoProcess::Euler));
-    
+
     function<double(double)> PutPayoff = std::bind(max<double>, std::bind(std::minus<double>(), _1, 10.0), 0.0);
     shared_ptr<FunctionTypePayoff> payoffFromBind(new FunctionTypePayoff(PutPayoff));
     shared_ptr<EuropeanOption> option(new EuropeanOption(payoffFromBind, 1.0));
-    
+
     shared_ptr<MCEuropeanEngine> mcengine(new MCEuropeanEngine(diprocess, 0.0));
     shared_ptr<FDEuropeanItoEngine> itoengine(new FDEuropeanItoEngine(diprocess, 0.0, 250, 800));
     itoengine->setBoundaryCondition(FDEuropeanItoEngine::Neumann, 0.004, 0.0);
-    
+
     option->setPricingEngine(itoengine);
     cout << option->getValue() << "\t";
     option->setPricingEngine(mcengine);
