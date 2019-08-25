@@ -20,12 +20,16 @@
 #include "GBM.h"
 #include <memory>
 #include <cmath>
+#include <algorithm>
 
 using std::shared_ptr;
 using std::cout;
 using std::endl;
 using namespace std::placeholders;
 using std::ofstream;
+using std::sin;
+using std::cos;
+using std::max;
 
 void section1();
 void section2();
@@ -55,7 +59,7 @@ int main(int argc, const char * argv[]) {
     shared_ptr<C2Function1D> diffusion(new C2Function1D(diff));
     shared_ptr<DriftlessItoProcess> diprocess(new DriftlessItoProcess(s0, diffusion, DriftlessItoProcess::Euler));
 
-    function<double(double)> PutPayoff = std::bind(max<double>, std::bind(std::minus<double>(), _1, 10.0), 0.0);
+    function<double(double)> PutPayoff = std::bind(std::fmaxl, std::bind(std::minus<double>(), _1, 10.0), 0.0);
     shared_ptr<FunctionTypePayoff> payoffFromBind(new FunctionTypePayoff(PutPayoff));
     shared_ptr<EuropeanOption> option(new EuropeanOption(payoffFromBind, 1.0));
 
@@ -170,7 +174,7 @@ void section1()
     
     // Sine process
     
-    diffusion->setFunc(sin);
+    diffusion->setFunc(sinl);
     
     output.open("../../../Graphs/Call_SIN.dat", std::ios::out);
     for (double Strike : Strikes)
@@ -187,8 +191,8 @@ void section1()
     
     // Sine process
     
-    diffusion->setFunc(sin);
-    diffusion->setDer(cos);
+    diffusion->setFunc(sinl);
+    diffusion->setDer(cosl);
     diffusion->setDer2nd(std::bind(std::negate<double>(), std::bind(sinl, _1)));
     diprocess->setDiscretization(DriftlessItoProcess::SecondEuler);
     
@@ -207,8 +211,8 @@ void section1()
     
     // Sine process
     
-    diffusion->setFunc(sin);
-    diffusion->setDer(cos);
+    diffusion->setFunc(sinl);
+    diffusion->setDer(cosl);
     diffusion->setDer2nd(std::bind(std::negate<double>(), std::bind(sinl, _1)));
     diprocess->setDiscretization(DriftlessItoProcess::Milstein);
     
@@ -361,8 +365,8 @@ void section2()
     
     // Sine process
     
-    diffusion->setFunc(sin);
-    diffusion->setDer(cos);
+    diffusion->setFunc(sinl);
+    diffusion->setDer(cosl);
     diffusion->setDer2nd(std::bind(std::negate<double>(), std::bind(sinl, _1)));
     output.open("../../../Graphs/Delta_SIN.dat", std::ios::out);
     n = 100;
@@ -544,7 +548,7 @@ void section3()
     
     // Sine process
     
-    diffusion->setFunc(sin);
+    diffusion->setFunc(sinl);
     output.open("../../../Graphs/Fourier_SIN.dat", std::ios::out);
     n = 50;
     for (int i = 0; i < n; ++i)
