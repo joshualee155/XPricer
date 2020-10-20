@@ -57,14 +57,14 @@ void FDEuropeanCEVEngine::calculate() const
     double dS = (maxS - minS)*S0/(double)nS;
     
     vector<double> S_mesh(nS + 1, 0.0);
-    for ( int i = 0; i < nS + 1; ++i)
+    for ( size_t i = 0; i < nS + 1; ++i)
     {
         S_mesh[i] = minS*S0 + i*dS;
     }
     
     double dT = Time/(double)nT;
     vector<double> T_mesh(nT + 1, 0.0);
-    for ( int j = 0; j < nT + 1; ++j)
+    for ( size_t j = 0; j < nT + 1; ++j)
     {
         T_mesh[j] = j*dT;
     }
@@ -80,7 +80,7 @@ void FDEuropeanCEVEngine::calculate() const
     vector<double> RHS(nS - 1, 0.0);     // Inner (nS-1) nodes of the RHS
     
     // Fill in the Terminal Condition
-    for (int i = 0; i < nS + 1; ++i)
+    for (size_t i = 0; i < nS + 1; ++i)
     {
         u_back[i] = type == VanillaPayoff::Call ? fmax(S_mesh[i] - Strike, 0.0) : fmax(Strike - S_mesh[i], 0.0);
     }

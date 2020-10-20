@@ -43,24 +43,29 @@ T max(T a, T b)
 
 int main(int argc, const char* argv[])
 {
-	//     section1();
-	// section2();
-	// section3();
+	//section1();
+	//section2();
+	//section3();
 
 	double sigma0 = 0.2;
 	double s0 = 10.0;
-	function<double(double)> diff = std::bind(std::multiplies<double>(),
-	                                          sigma0,
-	                                          std::bind(sqrtl,
-	                                                    std::bind(std::plus<double>(),
-	                                                              std::bind(powl,
-	                                                                        _1,
-	                                                                        2.0),
-	                                                              1.0)));
+
+	// the following is deprecated post c++11, should switch to lambda
+	//function<double(double)> diff = std::bind(std::multiplies<double>(),
+	//                                          sigma0,
+	//                                          std::bind(sqrtl,
+	//                                                    std::bind(std::plus<double>(),
+	//                                                              std::bind(powl,
+	//                                                                        _1,
+	//                                                                        2.0),
+	//                                                              1.0)));
+
+	auto diff = [sigma0](double x) {return sigma0 * sqrt(x*x + 1.0); };
 	shared_ptr<C2Function1D> diffusion(new C2Function1D(diff));
 	shared_ptr<DriftlessItoProcess> diprocess(new DriftlessItoProcess(s0, diffusion, DriftlessItoProcess::Euler));
 
-	function<double(double)> PutPayoff = std::bind(std::fmaxl, std::bind(std::minus<double>(), _1, 10.0), 0.0);
+	//function<double(double)> PutPayoff = std::bind(std::fmaxl, std::bind(std::minus<double>(), _1, 10.0), 0.0);
+	auto PutPayoff = [](double x) {return std::max(10. - x, 0.); };
 	shared_ptr<FunctionTypePayoff> payoffFromBind(new FunctionTypePayoff(PutPayoff));
 	shared_ptr<EuropeanOption> option(new EuropeanOption(payoffFromBind, 1.0));
 
@@ -82,7 +87,7 @@ void section1()
 	double sigma0 = 0.2;
 	double s0 = 10.0;
 	vector<double> Strikes{
-		8, 8.2, 8.4, 8.6, 8.8, 9, 9.2, 9.4, 9.59999999999999, 9.79999999999999, 9.99999999999999, 10.2, 10.4, 10.6, 10.8, 11,
+		8, 8.2, 8.4, 8.6, 8.8, 9, 9.2, 9.4, 9.6, 9.8, 10.0, 10.2, 10.4, 10.6, 10.8, 11,
 		11.2, 11.4, 11.6, 11.8, 12
 	};
 	ofstream output;
@@ -299,7 +304,7 @@ void section2()
 
 	output.open("../../../Graphs/Delta_GBM.dat", std::ios::out);
 	n = 200;
-	for (int i = 0; i < n; ++i)
+	for (size_t i = 0; i < n; ++i)
 	{
 		cout << "Writing files: " << i + 1 << "/" << n << endl;
 		double Strike = 5.0 + 10.0 / n * i;
